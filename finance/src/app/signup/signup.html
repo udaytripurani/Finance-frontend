@@ -1,0 +1,43 @@
+<div class="signup-container">
+  <mat-card class="signup-card">
+    <h2 class="title">Create an Account</h2>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <!-- Username -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Username</mat-label>
+        <input matInput formControlName="username" />
+        <mat-error *ngIf="form.get('username')?.hasError('required')">Username is required</mat-error>
+        <mat-error *ngIf="form.get('username')?.hasError('minlength')">Minimum 3 characters</mat-error>
+        <mat-error *ngIf="form.get('username')?.hasError('maxlength')">Maximum 30 characters</mat-error>
+      </mat-form-field>
+
+      <!-- Email -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" />
+        <mat-error *ngIf="form.get('email')?.hasError('required')">Email is required</mat-error>
+        <mat-error *ngIf="form.get('email')?.hasError('email')">Enter a valid email</mat-error>
+      </mat-form-field>
+
+      <!-- Password -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <input matInput type="password" formControlName="password" />
+        <mat-error *ngIf="form.get('password')?.hasError('required')">Password is required</mat-error>
+        <mat-error *ngIf="form.get('password')?.hasError('minlength')">Minimum 8 characters</mat-error>
+      </mat-form-field>
+
+      <div class="button-container">
+        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading">
+          {{ loading ? 'Signing Up...' : 'Sign Up' }}
+        </button>
+        <mat-progress-spinner *ngIf="loading" mode="indeterminate" diameter="24"></mat-progress-spinner>
+      </div>
+      <div class="switch-link">
+      <span>Already have an account?</span>
+      <a routerLink="/login">Login</a>
+    </div>
+    </form>
+  </mat-card>
+</div>
