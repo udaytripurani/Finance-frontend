@@ -1,1 +1,79 @@
-<p>navbar works!</p>
+<nav class="navbar">
+  <div class="nav-container">
+    <!-- Logo/Brand -->
+    <div class="nav-brand">
+      <a routerLink="/dashboard" class="brand-link">
+        <i class="fas fa-wallet"></i>
+        <span class="brand-text">FinanceTracker</span>
+      </a>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <ul class="nav-menu" [class.active]="isMenuOpen">
+      <li class="nav-item">
+        <a routerLink="/dashboard" 
+           class="nav-link" 
+           [class.active]="isActive('/dashboard')"
+           (click)="isMenuOpen = false">
+          <i class="fas fa-chart-line"></i>
+          Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/expenses" 
+           class="nav-link" 
+           [class.active]="isActive('/expenses')"
+           (click)="isMenuOpen = false">
+          <i class="fas fa-money-bill-wave"></i>
+          Expenses
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/budgets" 
+           class="nav-link" 
+           [class.active]="isActive('/budgets')"
+           (click)="isMenuOpen = false">
+          <i class="fas fa-piggy-bank"></i>
+          Budgets
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/analytics" 
+           class="nav-link" 
+           [class.active]="isActive('/analytics')"
+           (click)="isMenuOpen = false">
+          <i class="fas fa-chart-pie"></i>
+          Analytics
+        </a>
+      </li>
+      <li class="nav-item dropdown" *ngIf="user">
+        <a class="nav-link dropdown-toggle" id="userDropdown">
+          <i class="fas fa-user-circle"></i>
+          {{ user.name || user.email }}
+        </a>
+        <div class="dropdown-menu">
+          <a routerLink="/profile" class="dropdown-item">
+            <i class="fas fa-user-edit"></i>
+            Profile
+          </a>
+          <a routerLink="/settings" class="dropdown-item">
+            <i class="fas fa-cog"></i>
+            Settings
+          </a>
+          <div class="dropdown-divider"></div>
+          <a (click)="logout()" class="dropdown-item logout">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+          </a>
+        </div>
+      </li>
+    </ul>
+
+    <!-- Mobile Menu Toggle -->
+    <div class="nav-toggle" (click)="toggleMenu()">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
+  </div>
+</nav>
