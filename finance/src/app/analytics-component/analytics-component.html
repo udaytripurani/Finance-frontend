@@ -1,0 +1,244 @@
+<div class="analytics-container">
+  <div class="page-header">
+    <h1 class="page-title">
+      <i class="fas fa-chart-line me-2"></i>
+      Analytics & Reports
+    </h1>
+    <p class="page-subtitle">View your spending trends and financial insights</p>
+  </div>
+
+  <!-- Filter Controls -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <form [formGroup]="filterForm" class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label for="month" class="form-label">Month</label>
+          <select id="month" class="form-select" formControlName="month">
+            @for (month of monthNames; track $index) {
+              <option [value]="$index + 1">{{ month }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label for="year" class="form-label">Year</label>
+          <select id="year" class="form-select" formControlName="year">
+            @for (year of years; track year) {
+              <option [value]="year">{{ year }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-4">
+          <button 
+            type="button" 
+            class="btn btn-primary"
+            (click)="exportToCsv()"
+            [disabled]="isLoading">
+            <i class="fas fa-download me-2"></i>
+            @if (!isLoading) {
+              <span>Export CSV</span>
+            } @else {
+              <span>
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                Exporting...
+              </span>
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  @if (isLoading && !monthlySummary) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="mt-2 text-muted">Loading analytics data...</p>
+    </div>
+  }
+
+  <!-- Monthly Summary -->
+  @if (monthlySummary && !isLoading) {
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card text-white bg-success">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="card-title mb-1">Total Income</h5>
+                <h3 class="mb-0">₹{{ monthlySummary.income_total | number:'1.2-2' }}</h3>
+              </div>
+              <i class="fas fa-arrow-up fa-2x opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-white bg-danger">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="card-title mb-1">Total Expenses</h5>
+                <h3 class="mb-0">₹{{ monthlySummary.expense_total | number:'1.2-2' }}</h3>
+              </div>
+              <i class="fas fa-arrow-down fa-2x opacity-50"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-white" [ngClass]="monthlySummary.net_savings >= 0 ? 'bg-info' : 'bg-warning'">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="card-title mb-1">Net Savings</h5>
+                <h3 class="mb-0">₹{{ monthlySummary.net_savings | number:'1.2-2' }}</h3>
+              </div>
+              <i class="fas" [ngClass]="monthlySummary.net_savings >= 0 ? 'fa-piggy-bank' : 'fa-exclamation-triangle'" 
+                 style="font-size: 2rem; opacity: 0.5;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Budget Alerts -->
+    @if (monthlySummary?.budget_alerts && monthlySummary.budget_alerts.length > 0) {
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Budget Alerts
+          </h5>
+        </div>
+        <div class="card-body">
+          @for (alert of monthlySummary.budget_alerts; track alert.category) {
+            <div class="alert mb-3" [ngClass]="getBudgetAlertClass(alert.status)">
+              <div class="row align-items-center">
+                <div class="col-md-3">
+                  <h6 class="mb-0">{{ alert.category }}</h6>
+                </div>
+                <div class="col-md-6">
+                  <div class="progress mb-1" style="height: 8px;">
+                    <div class="progress-bar" 
+                         [ngClass]="getProgressBarClass(alert.status)"
+                         [style.width.%]="calculateProgressPercentage(alert.spent, alert.limit)">
+                    </div>
+                  </div>
+                  <small class="text-muted">
+                    ₹{{ alert.spent | number:'1.2-2' }} of ₹{{ alert.limit | number:'1.2-2' }}
+                  </small>
+                </div>
+                <div class="col-md-3 text-end">
+                  <span class="badge" 
+                        [ngClass]="{
+                          'bg-danger': alert.status === 'Over Budget',
+                          'bg-warning': alert.status === 'Near Limit',
+                          'bg-success': alert.status === 'On Track'
+                        }">
+                    {{ alert.status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Category Breakdown -->
+    @if (categoryBreakdown && categoryBreakdown.length > 0) {
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-chart-pie me-2"></i>
+            Expense Breakdown by Category
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-8">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Category</th>
+                      <th class="text-end">Amount</th>
+                      <th class="text-end">Percentage</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of categoryBreakdown; track item.category; let i = $index) {
+                      <tr>
+                        <td>
+                          <i class="fas fa-circle me-2" 
+                             [style.color]="getCategoryColor(i)"></i>
+                          {{ item.category }}
+                        </td>
+                        <td class="text-end">₹{{ item.amount | number:'1.2-2' }}</td>
+                        <td class="text-end">
+                          {{ (item.amount / monthlySummary!.expense_total * 100) | number:'1.1-1' }}%
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                  <tfoot class="table-light">
+                    <tr>
+                      <th>Total</th>
+                      <th class="text-end">₹{{ monthlySummary!.expense_total | number:'1.2-2' }}</th>
+                      <th class="text-end">100%</th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="chart-placeholder text-center py-5">
+                <i class="fas fa-chart-pie fa-4x text-muted mb-3"></i>
+                <p class="text-muted">
+                  <small>Pie chart visualization<br>will be implemented here</small>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Historical Trends Placeholder -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-chart-line me-2"></i>
+          Historical Trends
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="chart-placeholder text-center py-5">
+          <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
+          <p class="text-muted">
+            <small>
+              Line chart showing income vs expenses trends<br>
+              over the past 6 months will be implemented here
+            </small>
+          </p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- No Data Message -->
+  @if (!isLoading && monthlySummary && (monthlySummary.income_total === 0 && monthlySummary.expense_total === 0)) {
+    <div class="card">
+      <div class="card-body text-center py-5">
+        <i class="fas fa-chart-line fa-4x text-muted mb-3"></i>
+        <h5 class="text-muted">No data available</h5>
+        <p class="text-muted">
+          No transactions found for {{ monthNames[selectedMonth - 1] }} {{ selectedYear }}.
+          <br>Try selecting a different month or add some transactions.
+        </p>
+      </div>
+    </div>
+  }
+</div>
