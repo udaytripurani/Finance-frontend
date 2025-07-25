@@ -10,6 +10,10 @@ class TransactionBase(models.Model):
     description = models.TextField(blank=True)
     date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
+    is_recurring = models.BooleanField(default=False)
+    recurrence_type = models.CharField(max_length=10, choices=[('weekly', 'Weekly'), ('monthly', 'Monthly')], null=True, blank=True)
+    recurrence_count = models.PositiveIntegerField(null=True, blank=True)
+
 
     class Meta:
         abstract = True
