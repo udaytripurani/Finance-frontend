@@ -1,10 +1,92 @@
-<p>budget works!</p>
 <div class="budget-container">
   <div class="header">
     <h2>Budget Management</h2>
-    <button class="btn btn-primary" (click)="showCreateForm = !showCreateForm">
-      {{ showCreateForm ? 'Cancel' : 'Create Budget' }}
-    </button>
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="showCategoryForm = !showCategoryForm">
+        {{ showCategoryForm ? 'Cancel Category' : 'Manage Categories' }}
+      </button>
+      <button class="btn btn-primary" (click)="showCreateForm = !showCreateForm">
+        {{ showCreateForm ? 'Cancel' : 'Create Budget' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Category Management Section -->
+  <div class="category-management" *ngIf="showCategoryForm">
+    <div class="section-title">
+      <h3>{{ editingCategory ? 'Edit Category' : 'Create New Category' }}</h3>
+    </div>
+    
+    <form [formGroup]="categoryForm" (ngSubmit)="onSubmitCategory()" class="category-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="categoryName">Category Name</label>
+          <input 
+            id="categoryName" 
+            type="text" 
+            formControlName="name" 
+            class="form-control"
+            placeholder="e.g., Groceries, Utilities">
+          <div class="error" *ngIf="categoryForm.get('name')?.errors?.['required'] && categoryForm.get('name')?.touched">
+            Category name is required
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="categoryType">Type</label>
+          <select id="categoryType" formControlName="type" class="form-control" [disabled]="true">
+            <option value="expense">Expense</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group full-width">
+          <label for="categoryDescription">Description (Optional)</label>
+          <textarea 
+            id="categoryDescription" 
+            formControlName="description" 
+            class="form-control"
+            placeholder="Additional details about this category"></textarea>
+        </div>
+      </div>
+      
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="categoryForm.invalid">
+          {{ editingCategory ? 'Update Category' : 'Create Category' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="cancelCategoryForm()">
+          Cancel
+        </button>
+      </div>
+    </form>
+    
+    <!-- Existing Categories List -->
+    <div class="existing-categories">
+      <h4>Existing Expense Categories</h4>
+      <div class="categories-grid">
+        <div *ngIf="expenseCategories.length === 0" class="empty-categories">
+          <p>No expense categories found. Create your first category above.</p>
+        </div>
+        <div *ngFor="let category of expenseCategories" class="category-card">
+          <div class="category-header">
+            <span class="category-name">{{ category.name }}</span>
+            <span class="category-type">Expense</span>
+          </div>
+          <div class="category-description" *ngIf="category.description">
+            {{ category.description }}
+          </div>
+          <div class="category-actions">
+            <button class="btn btn-sm btn-outline" (click)="editCategory(category)">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="btn btn-sm btn-danger" (click)="deleteCategory(category.id)">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Budget Alerts -->
@@ -50,59 +132,77 @@
   <!-- Create/Edit Budget Form -->
   <div class="form-section" *ngIf="showCreateForm || editingBudget">
     <h3>{{ editingBudget ? 'Edit Budget' : 'Create Budget' }}</h3>
-    <form [formGroup]="budgetForm" (ngSubmit)="onSubmit()">
+    <form [formGroup]="budgetForm" (ngSubmit)="onSubmitBudget()">
       <div class="form-row">
         <div class="form-group">
-          <label for="category">Category</label>
-          <select id="category" formControlName="category" class="form-control">
-            <option value="">Select Category</option>
-            <option *ngFor="let cat of expenseCategories" [value]="cat.id">
-              {{ cat.name }}
-            </option>
-          </select>
-          <div class="error" *ngIf="budgetForm.get('category')?.errors?.['required'] && budgetForm.get('category')?.touched">
-            Category is required
+          <label for="name">Budget Name</label>
+          <input 
+            id="name" 
+            type="text" 
+            formControlName="name" 
+            class="form-control"
+            placeholder="e.g., Monthly Groceries">
+          <div class="error" *ngIf="budgetForm.get('name')?.errors?.['required'] && budgetForm.get('name')?.touched">
+            Budget name is required
           </div>
         </div>
 
         <div class="form-group">
-          <label for="monthly_limit">Monthly Limit (₹)</label>
-          <input 
-            id="monthly_limit" 
-            type="number" 
-            formControlName="monthly_limit" 
-            class="form-control"
-            min="0"
-            step="0.01"
-            placeholder="Enter amount">
-          <div class="error" *ngIf="budgetForm.get('monthly_limit')?.errors?.['required'] && budgetForm.get('monthly_limit')?.touched">
-            Monthly limit is required
+          <label for="category">Category</label>
+          <div class="category-select-container">
+            <select id="category" formControlName="category" class="form-control">
+              <option value="">Select Category</option>
+              <option *ngFor="let cat of expenseCategories" [value]="cat.id">
+                {{ cat.name }}
+              </option>
+            </select>
+            <button type="button" class="btn btn-sm btn-add-category" (click)="showCategoryForm = true">
+              <i class="fas fa-plus"></i> New Category
+            </button>
           </div>
-          <div class="error" *ngIf="budgetForm.get('monthly_limit')?.errors?.['min'] && budgetForm.get('monthly_limit')?.touched">
-            Amount must be greater than 0
+          <div class="error" *ngIf="budgetForm.get('category')?.errors?.['required'] && budgetForm.get('category')?.touched">
+            Category is required
           </div>
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
-          <label for="month">Month</label>
-          <select id="month" formControlName="month" class="form-control">
-            <option *ngFor="let month of months; let i = index" [value]="i + 1">
-              {{ month }}
-            </option>
-          </select>
+          <label for="amount">Budget Amount (₹)</label>
+          <input 
+            id="amount" 
+            type="number" 
+            formControlName="amount" 
+            class="form-control"
+            min="0.01"
+            step="0.01"
+            placeholder="Enter amount">
+          <div class="error" *ngIf="budgetForm.get('amount')?.errors?.['required'] && budgetForm.get('amount')?.touched">
+            Budget amount is required
+          </div>
+          <div class="error" *ngIf="budgetForm.get('amount')?.errors?.['min'] && budgetForm.get('amount')?.touched">
+            Amount must be greater than 0
+          </div>
         </div>
 
         <div class="form-group">
-          <label for="year">Year</label>
+          <label for="start_date">Start Date</label>
           <input 
-            id="year" 
-            type="number" 
-            formControlName="year" 
-            class="form-control"
-            [min]="currentYear"
-            [max]="currentYear + 5">
+            id="start_date" 
+            type="date" 
+            formControlName="start_date" 
+            class="form-control">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="end_date">End Date</label>
+          <input 
+            id="end_date" 
+            type="date" 
+            formControlName="end_date" 
+            class="form-control">
         </div>
       </div>
 
@@ -110,7 +210,7 @@
         <button type="submit" class="btn btn-primary" [disabled]="budgetForm.invalid">
           {{ editingBudget ? 'Update Budget' : 'Create Budget' }}
         </button>
-        <button type="button" class="btn btn-secondary" (click)="cancelForm()">
+        <button type="button" class="btn btn-secondary" (click)="cancelBudgetForm()">
           Cancel
         </button>
       </div>
@@ -122,18 +222,24 @@
     <h3>Current Budgets</h3>
     <div class="budget-table">
       <div class="table-header">
+        <div>Budget Name</div>
         <div>Category</div>
-        <div>Monthly Limit</div>
+        <div>Amount</div>
         <div>Period</div>
         <div>Actions</div>
       </div>
       <div *ngFor="let budget of budgets" class="table-row">
-        <div class="category-cell">
-          <span class="category-icon">💰</span>
-          {{ budget.category.name }}
+        <div class="name-cell">
+          <span class="budget-icon">📊</span>
+          {{ budget.name }}
         </div>
-        <div class="limit-cell">₹{{ budget.monthly_limit | number:'1.2-2' }}</div>
-        <div class="period-cell">{{ getMonthName(budget.month) }} {{ budget.year }}</div>
+        <div class="category-cell">
+          {{ getCategoryName(budget.category) }}
+        </div>
+        <div class="amount-cell">₹{{ budget.amount | number:'1.2-2' }}</div>
+        <div class="period-cell">
+          {{ formatDate(budget.start_date) }} to {{ formatDate(budget.end_date) }}
+        </div>
         <div class="actions-cell">
           <button class="btn btn-sm btn-outline" (click)="editBudget(budget)" title="Edit Budget">
             Edit
@@ -143,10 +249,17 @@
           </button>
         </div>
       </div>
-      <div *ngIf="budgets.length === 0" class="empty-state">
+      <div *ngIf="budgets.length === 0 && expenseCategories.length > 0" class="empty-state">
         <div class="empty-icon">📊</div>
         <p>No budgets created yet.</p>
         <p>Create your first budget to start tracking your spending.</p>
+        <button class="btn btn-primary" (click)="showCreateForm = true">Create Budget</button>
+      </div>
+      <div *ngIf="expenseCategories.length === 0" class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <p>No expense categories found.</p>
+        <p>Please create at least one expense category before creating budgets.</p>
+        <button class="btn btn-primary" (click)="showCategoryForm = true">Create Category</button>
       </div>
     </div>
   </div>
