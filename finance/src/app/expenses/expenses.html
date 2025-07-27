@@ -1,0 +1,303 @@
+<p>expenses works!</p>
+<div class="expense-management">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="header-content">
+      <h1 class="page-title">
+        <i class="fas fa-money-bill-wave"></i>
+        Expense Management
+      </h1>
+      <button class="btn btn-primary" (click)="openModal()">
+        <i class="fas fa-plus"></i>
+        Add Transaction
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters and Search Section -->
+  <div class="filters-section">
+    <div class="filters-row">
+      <!-- Search -->
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input 
+          type="text" 
+          placeholder="Search transactions..." 
+          [(ngModel)]="searchTerm"
+          (input)="onFilterChange()"
+          class="search-input">
+      </div>
+
+      <!-- Type Filter -->
+      <select [(ngModel)]="selectedType" (change)="onFilterChange()" class="filter-select">
+        <option value="all">All Types</option>
+        <option value="expense">Expenses</option>
+        <option value="income">Income</option>
+      </select>
+
+      <!-- Category Filter -->
+      <select [(ngModel)]="selectedCategory" (change)="onFilterChange()" class="filter-select">
+        <option value="all">All Categories</option>
+        <option *ngFor="let category of categories" [value]="category.name">
+          {{ category.name }}
+        </option>
+      </select>
+
+      <!-- Date Range Filter -->
+      <select [(ngModel)]="selectedDateRange" (change)="onFilterChange()" class="filter-select">
+        <option value="all">All Time</option>
+        <option value="today">Today</option>
+        <option value="week">Last 7 Days</option>
+        <option value="month">Last 30 Days</option>
+      </select>
+
+      <!-- Sort Options -->
+      <select [(ngModel)]="sortBy" (change)="onFilterChange()" class="filter-select">
+        <option value="date">Sort by Date</option>
+        <option value="amount">Sort by Amount</option>
+        <option value="category">Sort by Category</option>
+      </select>
+
+      <button 
+        class="btn btn-outline" 
+        (click)="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; onFilterChange()">
+        <i class="fas" [class.fa-sort-up]="sortOrder === 'asc'" [class.fa-sort-down]="sortOrder === 'desc'"></i>
+      </button>
+
+      <!-- Export Button -->
+      <button class="btn btn-secondary" (click)="exportToCsv()">
+        <i class="fas fa-download"></i>
+        Export CSV
+      </button>
+    </div>
+  </div>
+
+  <!-- Results Summary -->
+  <div class="summary-section" *ngIf="filteredTransactions.length > 0">
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="summary-icon income">
+          <i class="fas fa-arrow-up"></i>
+        </div>
+        <div class="summary-content">
+          <span class="summary-label">Total Income</span>
+          <span class="summary-value">₹{{ totalIncome.toFixed(2) }}</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon expense">
+          <i class="fas fa-arrow-down"></i>
+        </div>
+        <div class="summary-content">
+          <span class="summary-label">Total Expenses</span>
+          <span class="summary-value">₹{{ totalExpenses.toFixed(2) }}</span>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-icon balance">
+          <i class="fas fa-balance-scale"></i>
+        </div>
+        <div class="summary-content">
+          <span class="summary-label">Net Balance</span>
+          <span class="summary-value" 
+                [class.positive]="isBalancePositive"
+                [class.negative]="isBalanceNegative">
+            ₹{{ netBalance.toFixed(2) }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading transactions...</p>
+  </div>
+
+  <!-- Transactions List -->
+  <div class="transactions-container" *ngIf="!loading">
+    <div class="transactions-header" *ngIf="filteredTransactions.length > 0">
+      <h3>Transactions ({{ filteredTransactions.length }})</h3>
+    </div>
+
+    <div class="no-transactions" *ngIf="filteredTransactions.length === 0">
+      <i class="fas fa-receipt"></i>
+      <h3>No transactions found</h3>
+      <p>Try adjusting your filters or add your first transaction.</p>
+    </div>
+
+    <div class="transactions-list">
+      <div class="transaction-card" 
+           *ngFor="let transaction of filteredTransactions; trackBy: trackByFn"
+           [class.income]="transaction.type === 'income'"
+           [class.expense]="transaction.type === 'expense'">
+        
+        <div class="transaction-icon" 
+             [style.background-color]="getCategoryColor(transaction.category)">
+          <i [class]="getCategoryIcon(transaction.category)"></i>
+        </div>
+
+        <div class="transaction-details">
+          <div class="transaction-header">
+            <h4 class="transaction-description">{{ transaction.description }}</h4>
+            <div class="transaction-badges">
+              <span class="badge" 
+                    [class.badge-income]="transaction.type === 'income'"
+                    [class.badge-expense]="transaction.type === 'expense'">
+                {{ transaction.type }}
+              </span>
+              <span class="badge badge-recurring" *ngIf="transaction.isRecurring">
+                <i class="fas fa-sync-alt"></i>
+                {{ transaction.recurringType }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="transaction-meta">
+            <span class="transaction-category">
+              <i [class]="getCategoryIcon(transaction.category)"></i>
+              {{ transaction.category }}
+            </span>
+            <span class="transaction-date">
+              <i class="fas fa-calendar"></i>
+              {{ transaction.date | date:'MMM dd, yyyy' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="transaction-amount" 
+             [class.income-amount]="transaction.type === 'income'"
+             [class.expense-amount]="transaction.type === 'expense'">
+          <span class="amount-symbol">{{ transaction.type === 'income' ? '+' : '-' }}</span>
+          ₹{{ transaction.amount.toFixed(2) }}
+        </div>
+
+        <div class="transaction-actions">
+          <button class="btn-action edit" 
+                  (click)="editTransaction(transaction)"
+                  title="Edit Transaction">
+            <i class="fas fa-edit"></i>
+          </button>
+          <button class="btn-action delete" 
+                  (click)="deleteTransaction(transaction)"
+                  title="Delete Transaction">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Transaction Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ editingTransaction ? 'Edit Transaction' : 'Add New Transaction' }}</h2>
+      <button class="modal-close" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="transaction-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="type">Transaction Type</label>
+          <select formControlName="type" id="type" class="form-control">
+            <option value="expense">Expense</option>
+            <option value="income">Income</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="amount">Amount (₹)</label>
+          <input 
+            type="number" 
+            formControlName="amount" 
+            id="amount" 
+            class="form-control"
+            placeholder="0.00"
+            step="0.01"
+            min="0.01">
+          <div class="error-message" *ngIf="transactionForm.get('amount')?.errors && transactionForm.get('amount')?.touched">
+            <span *ngIf="transactionForm.get('amount')?.errors?.['required']">Amount is required</span>
+            <span *ngIf="transactionForm.get('amount')?.errors?.['min']">Amount must be greater than 0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="category">Category</label>
+        <select formControlName="category" id="category" class="form-control">
+          <option value="">Select a category</option>
+          <option *ngFor="let category of categories" [value]="category.name">
+            {{ category.name }}
+          </option>
+        </select>
+        <div class="error-message" *ngIf="transactionForm.get('category')?.errors && transactionForm.get('category')?.touched">
+          <span *ngIf="transactionForm.get('category')?.errors?.['required']">Category is required</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <input 
+          type="text" 
+          formControlName="description" 
+          id="description" 
+          class="form-control"
+          placeholder="Enter transaction description">
+        <div class="error-message" *ngIf="transactionForm.get('description')?.errors && transactionForm.get('description')?.touched">
+          <span *ngIf="transactionForm.get('description')?.errors?.['required']">Description is required</span>
+          <span *ngIf="transactionForm.get('description')?.errors?.['minlength']">Description must be at least 3 characters</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="date">Date</label>
+        <input 
+          type="date" 
+          formControlName="date" 
+          id="date" 
+          class="form-control">
+        <div class="error-message" *ngIf="transactionForm.get('date')?.errors && transactionForm.get('date')?.touched">
+          <span *ngIf="transactionForm.get('date')?.errors?.['required']">Date is required</span>
+        </div>
+      </div>
+
+      <div class="form-group recurring-section">
+        <div class="checkbox-wrapper">
+          <input 
+            type="checkbox" 
+            formControlName="isRecurring" 
+            id="isRecurring">
+          <label for="isRecurring" class="checkbox-label">
+            <i class="fas fa-sync-alt"></i>
+            This is a recurring transaction
+          </label>
+        </div>
+
+        <div class="recurring-options" *ngIf="transactionForm.get('isRecurring')?.value">
+          <label for="recurringType">Frequency</label>
+          <select formControlName="recurringType" id="recurringType" class="form-control">
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">
+          Cancel
+        </button>
+        <button type="submit" 
+                class="btn btn-primary" 
+                [disabled]="!transactionForm.valid || loading">
+          <span *ngIf="loading" class="spinner-sm"></span>
+          {{ editingTransaction ? 'Update' : 'Add' }} Transaction
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
