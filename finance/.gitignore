@@ -40,7 +40,8 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
- ../.DS_Store
+../.DS_Store
 
-node_modules/
+# Python & Node (common in monorepos)
 ../project-root/venv/
+node_modules/
