@@ -13,7 +13,7 @@ jobs:
 
     env:
       PROJECT_DIR: finance
-      BUILD_DIR: dist/finance
+      BUILD_DIR: dist/finance  # Matches your angular.json output
 
     steps:
       - name: Checkout code
@@ -29,6 +29,15 @@ jobs:
           cd $PROJECT_DIR
           npm install
           npm run build -- --configuration production
+
+      # 🔍 ADD THIS VERIFICATION STEP (CRITICAL FOR DEBUGGING)
+      - name: Verify build output
+        run: |
+          echo "Checking build output structure:"
+          ls -R ${{ env.PROJECT_DIR }}/${{ env.BUILD_DIR }}
+          echo -e "\nVerifying key files exist:"
+          test -f ${{ env.PROJECT_DIR }}/${{ env.BUILD_DIR }}/index.html && echo "✓ index.html exists"
+          test -f ${{ env.PROJECT_DIR }}/${{ env.BUILD_DIR }}/assets/logo.png && echo "✓ logo.png exists"
 
       - name: Upload to Azure Web App
         uses: azure/webapps-deploy@v2
