@@ -111,18 +111,13 @@ WSGI_APPLICATION = 'finance_tracker.wsgi.application'
 # }
 
 DATABASES = {
-    "default" : {
-        "ENGINE": "django.db.backends.postgresql",
-        # "NAME": "mydatabase",
-        "NAME": os.getenv('DB_NAME'),
-        # "USER": "mydatabaseuser",
-        "USER": os.getenv('DB_USER'),
-        "PASSWORD": os.getenv('DB_PASSWORD'),
-        # "PASSWORD": "mypassword",
-        "HOST": os.getenv('DB_HOST','localhost'),
-        # "HOST": "127.0.0.1",
-        "PORT": os.getenv('DB_PORT','5432'),
-        # "PORT": "5432",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'your_supabase_password',  # Replace with real password
+        'HOST': 'db.tdtixeaqfqpfxbivzjcw.supabase.co',
+        'PORT': '5432',
     }
 }
 

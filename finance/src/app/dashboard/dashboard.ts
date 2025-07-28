@@ -196,7 +196,7 @@ export class DashboardComponent implements OnInit {
         this.expenseTransactions = data.expenses;
         this.balance = data.balance;
         this.processData();
-        this.loadRecurringTransactions(); // Load recurring transactions
+        // this.loadRecurringTransactions(); // Load recurring transactions
         this.loading = false;
       },
       error: (error) => {
@@ -207,28 +207,28 @@ export class DashboardComponent implements OnInit {
     });
   }
   
-  // ADDED: Method to load recurring transactions
-  private loadRecurringTransactions(): void {
-    this.getRecurringTransactions().subscribe({
-      next: (transactions) => {
-        this.recurringTransactions = transactions;
-      },
-      error: (error) => {
-        console.error('Error loading recurring transactions:', error);
-        // Don't fail the whole dashboard for this
-        this.recurringTransactions = [];
-      }
-    });
-  }
+  // // ADDED: Method to load recurring transactions
+  // private loadRecurringTransactions(): void {
+  //   this.getRecurringTransactions().subscribe({
+  //     next: (transactions) => {
+  //       this.recurringTransactions = transactions;
+  //     },
+  //     error: (error) => {
+  //       console.error('Error loading recurring transactions:', error);
+  //       // Don't fail the whole dashboard for this
+  //       this.recurringTransactions = [];
+  //     }
+  //   });
+  // }
   
-  // ADDED: API call for recurring transactions
-  private getRecurringTransactions(): Observable<RecurringTransaction[]> {
-    return this.http.get<RecurringTransaction[]>(`${this.apiUrl}/recurring-transactions/`, {
-      headers: this.getHeaders()
-    }).pipe(
-      catchError(() => of([]))
-    );
-  }
+  // // ADDED: API call for recurring transactions
+  // private getRecurringTransactions(): Observable<RecurringTransaction[]> {
+  //   return this.http.get<RecurringTransaction[]>(`${this.apiUrl}/recurring-transactions/`, {
+  //     headers: this.getHeaders()
+  //   }).pipe(
+  //     catchError(() => of([]))
+  //   );
+  // }
   
   private getCategories(): Observable<Category[]> {
     return this.http.get<Category[]>(`${this.apiUrl}/categories/`, {
