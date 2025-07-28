@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-3y8w3muhaug_myd4ia_s#v+h+air0!hia20kp)^dfceiqmf%*(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
 
     #third-party 
     'rest_framework',
@@ -72,8 +73,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # Put it at the top
+    'django.middleware.common.CommonMiddleware',
 ]
-
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200",
+]
 ROOT_URLCONF = 'finance_tracker.urls'
 
 TEMPLATES = [
