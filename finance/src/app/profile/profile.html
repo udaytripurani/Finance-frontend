@@ -1,0 +1,228 @@
+<div class="profile-settings-container">
+  <div class="header">
+    <h1>Profile & Settings</h1>
+    <p>Manage your account settings and preferences</p>
+  </div>
+  <div class="content-grid">
+    <!-- Profile Section -->
+    <div class="profile-section card">
+      <div class="card-header">
+        <h2>
+          <i class="icon-user"></i>
+          Profile Information
+        </h2>
+        <div class="actions">
+          <button 
+            *ngIf="isEditing" 
+            type="button" 
+            class="btn btn-secondary"
+            (click)="cancelEdit()"
+            [disabled]="isLoading">
+            Cancel
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-primary"
+            (click)="toggleEdit()"
+            [disabled]="isLoading">
+            <i class="icon" [class.icon-save]="isEditing" [class.icon-edit]="!isEditing"></i>
+            {{ isEditing ? 'Save' : 'Edit' }}
+          </button>
+        </div>
+      </div>
+      <div class="profile-avatar">
+        <div class="avatar">{{ getUserInitials() }}</div>
+        <button *ngIf="isEditing" class="btn btn-secondary">Change Photo</button>
+      </div>
+      <div class="form-grid" *ngIf="!isLoading">
+        <div class="form-group">
+          <label>Full Name</label>
+          <div *ngIf="!isEditing" class="field-display">
+            <i class="icon-user"></i>
+            <span>{{ profile.full_name }}</span>
+          </div>
+          <input 
+            *ngIf="isEditing"
+            type="text" 
+            class="form-control"
+            [(ngModel)]="tempProfile.full_name"
+            placeholder="Enter full name">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <div class="field-display">
+            <i class="icon-mail"></i>
+            <span>{{ profile.email }}</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <div *ngIf="!isEditing" class="field-display">
+            <i class="icon-phone"></i>
+            <span>{{ profile.phone || 'Not provided' }}</span>
+          </div>
+          <input 
+            *ngIf="isEditing"
+            type="tel" 
+            class="form-control"
+            [(ngModel)]="tempProfile.phone"
+            placeholder="Enter phone number">
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <div *ngIf="!isEditing" class="field-display">
+            <i class="icon-location"></i>
+            <span>{{ profile.location || 'Not provided' }}</span>
+          </div>
+          <input 
+            *ngIf="isEditing"
+            type="text" 
+            class="form-control"
+            [(ngModel)]="tempProfile.location"
+            placeholder="Enter location">
+        </div>
+      </div>
+      <div *ngIf="isLoading" class="loading">
+        Loading profile...
+      </div>
+    </div>
+    <!-- Currency Settings -->
+    <div class="currency-section card">
+      <div class="card-header">
+        <h2>
+          <i class="icon-dollar"></i>
+          Currency Settings
+        </h2>
+      </div>
+      <div class="form-group">
+        <label>Default Currency</label>
+        <select 
+          class="form-control"
+          [(ngModel)]="selectedCurrency"
+          (change)="saveCurrencySettings()">
+          <option *ngFor="let currency of currencies" [value]="currency.code">
+            {{ currency.symbol }} {{ currency.code }} - {{ currency.name }}
+          </option>
+        </select>
+      </div>
+      <div class="currency-preview">
+        <h3>Current Selection</h3>
+        <div class="currency-display">
+          <span class="currency-symbol">{{ getSelectedCurrency()?.symbol }}</span>
+          <div class="currency-info">
+            <div class="currency-code">{{ getSelectedCurrency()?.code }}</div>
+            <div class="currency-name">{{ getSelectedCurrency()?.name }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Notification Preferences -->
+  <div class="notifications-section card">
+    <div class="card-header">
+      <h2>
+        <i class="icon-bell"></i>
+        Notification Preferences
+      </h2>
+    </div>
+    <div class="notifications-grid">
+      <div class="notification-group">
+        <h3>Expense Notifications</h3>
+        <div class="notification-items">
+          <div class="notification-item">
+            <label class="toggle-switch">
+              <input 
+                type="checkbox" 
+                [checked]="notifications.dailyReminders"
+                (change)="toggleNotification('dailyReminders')">
+              <span class="slider"></span>
+            </label>
+            <div class="notification-info">
+              <div class="notification-label">Daily expense reminders</div>
+              <div class="notification-desc">Get reminded to log your daily expenses</div>
+            </div>
+          </div>
+          <div class="notification-item">
+            <label class="toggle-switch">
+              <input 
+                type="checkbox" 
+                [checked]="notifications.budgetAlerts"
+                (change)="toggleNotification('budgetAlerts')">
+              <span class="slider"></span>
+            </label>
+            <div class="notification-info">
+              <div class="notification-label">Budget alerts</div>
+              <div class="notification-desc">Notify when approaching budget limits</div>
+            </div>
+          </div>
+          <div class="notification-item">
+            <label class="toggle-switch">
+              <input 
+                type="checkbox" 
+                [checked]="notifications.weeklyReports"
+                (change)="toggleNotification('weeklyReports')">
+              <span class="slider"></span>
+            </label>
+            <div class="notification-info">
+              <div class="notification-label">Weekly spending reports</div>
+              <div class="notification-desc">Receive weekly expense summaries</div>
+            </div>
+          </div>
+          <div class="notification-item">
+            <label class="toggle-switch">
+              <input 
+                type="checkbox" 
+                [checked]="notifications.expenseUpdates"
+                (change)="toggleNotification('expenseUpdates')">
+              <span class="slider"></span>
+            </label>
+            <div class="notification-info">
+              <div class="notification-label">Expense updates</div>
+              <div class="notification-desc">Notifications for expense changes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="notification-group">
+        <h3>Delivery Methods</h3>
+        <div class="notification-items">
+          <div class="notification-item">
+            <label class="toggle-switch">
+              <input 
+                type="checkbox" 
+                [checked]="notifications.emailNotifications"
+                (change)="toggleNotification('emailNotifications')">
+              <span class="slider"></span>
+            </label>
+            <div class="notification-info">
+              <div class="notification-label">Email notifications</div>
+              <div class="notification-desc">Receive notifications via email</div>
+            </div>
+          </div>
+          <div class="notification-item">
+            <label class="toggle-switch">
+              <input 
+                type="checkbox" 
+                [checked]="notifications.pushNotifications"
+                (change)="toggleNotification('pushNotifications')">
+              <span class="slider"></span>
+            </label>
+            <div class="notification-info">
+              <div class="notification-label">Push notifications</div>
+              <div class="notification-desc">Browser and mobile push notifications</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="actions-footer">
+      <button 
+        type="button" 
+        class="btn btn-success"
+        (click)="saveNotificationSettings()">
+        <i class="icon-save"></i>
+        Save Notification Settings
+      </button>
+    </div>
+  </div>
+</div>

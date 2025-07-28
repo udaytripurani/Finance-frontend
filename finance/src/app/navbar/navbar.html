@@ -1,0 +1,83 @@
+<nav class="navbar">
+  <div class="nav-container">
+    <!-- Wallet Image on LEFT SIDE -->
+   <div class="wallet-icon-container">
+  <i class="fas fa-wallet wallet-icon" aria-hidden="true"></i>
+</div>
+
+
+    <!-- Brand -->
+    <div class="nav-brand">
+      <a routerLink="/dashboard" class="brand-link">
+        <span class="brand-text">FinanceTracker</span>
+      </a>
+    </div>
+
+    <!-- Navigation Menu -->
+    <ul class="nav-menu" [class.active]="isMenuOpen">
+      <li class="nav-item">
+        <a routerLink="/dashboard"
+           class="nav-link"
+           [class.active]="isActive('/dashboard')"
+           (click)="closeMobileMenu()">
+          <i class="fas fa-chart-line"></i>
+          Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/expenses"
+           class="nav-link"
+           [class.active]="isActive('/expenses')"
+           (click)="closeMobileMenu()">
+          <i class="fas fa-money-bill-wave"></i>
+          Expenses
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/budgets"
+           class="nav-link"
+           [class.active]="isActive('/budgets')"
+           (click)="closeMobileMenu()">
+          <i class="fas fa-piggy-bank"></i>
+          Budgets
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/analytics"
+           class="nav-link"
+           [class.active]="isActive('/analytics')"
+           (click)="closeMobileMenu()">
+          <i class="fas fa-chart-pie"></i>
+          Analytics
+        </a>
+      </li>
+
+      <!-- Profile - Visible only when logged in -->
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a routerLink="/profile"
+           class="nav-link"
+           [class.active]="isActive('/profile')"
+           (click)="closeMobileMenu()">
+          <i class="fas fa-user-circle"></i>
+          Profile
+        </a>
+      </li>
+
+      <!-- Logout - Visible only when logged in -->
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a class="nav-link logout-link"
+           (click)="logout(); closeMobileMenu()">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </a>
+      </li>
+    </ul>
+
+    <!-- Hamburger -->
+    <div class="nav-toggle" (click)="toggleMenu()" [class.active]="isMenuOpen">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </div>
+  </div>
+</nav>

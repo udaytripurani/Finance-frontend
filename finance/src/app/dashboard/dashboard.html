@@ -1,0 +1,331 @@
+<div class="dashboard-container">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1 class="dashboard-title">Finance Dashboard</h1>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" class="add-transaction-btn" (click)="onAddTransaction()">
+          <mat-icon>add</mat-icon>
+          Add Transaction
+        </button>
+        <mat-form-field appearance="outline" class="period-selector">
+          <mat-label>Period</mat-label>
+          <mat-select value="month" (selectionChange)="onPeriodChange($event.value)">
+            <mat-option value="week">This Week</mat-option>
+            <mat-option value="month">This Month</mat-option>
+            <mat-option value="year">This Year</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <p>Loading dashboard data...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-container">
+    <mat-icon color="warn">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="refreshData()">
+      <mat-icon>refresh</mat-icon>
+      Retry
+    </button>
+  </div>
+
+  <!-- Main Content - Only show when not loading and no error -->
+  <div *ngIf="!loading && !error">
+    <!-- KPI Cards Row -->
+    <div class="kpi-section">
+      <mat-card class="kpi-card income-card">
+        <div class="kpi-content">
+          <div class="kpi-icon income-icon">
+            <mat-icon>trending_up</mat-icon>
+          </div>
+          <div class="kpi-details">
+            <span class="kpi-label">Total Income</span>
+            <span class="kpi-value">₹{{ income | number:'1.0-0' }}</span>
+            <span class="kpi-change positive">+12.5% from last month</span>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="kpi-card expense-card">
+        <div class="kpi-content">
+          <div class="kpi-icon expense-icon">
+            <mat-icon>trending_down</mat-icon>
+          </div>
+          <div class="kpi-details">
+            <span class="kpi-label">Total Expenses</span>
+            <span class="kpi-value">₹{{ expenses | number:'1.0-0' }}</span>
+            <span class="kpi-change negative">+5.2% from last month</span>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="kpi-card savings-card" [class.positive]="savings > 0" [class.negative]="savings < 0">
+        <div class="kpi-content">
+          <div class="kpi-icon savings-icon">
+            <mat-icon>savings</mat-icon>
+          </div>
+          <div class="kpi-details">
+            <span class="kpi-label">Net Savings</span>
+            <span class="kpi-value">₹{{ savings | number:'1.0-0' }}</span>
+            <span class="kpi-change" [class.positive]="savings > 0" [class.negative]="savings < 0">
+              {{ savings > 0 ? 'Great job!' : 'Review expenses' }}
+            </span>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="kpi-card goal-card">
+        <div class="kpi-content">
+          <div class="kpi-icon goal-icon">
+            <mat-icon>flag</mat-icon>
+          </div>
+          <div class="kpi-details">
+            <span class="kpi-label">Savings Goal</span>
+            <span class="kpi-value">78%</span>
+            <div class="goal-progress">
+              <mat-progress-bar value="78" mode="determinate" color="accent"></mat-progress-bar>
+            </div>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="main-content-grid">
+      <!-- Spending Categories Chart -->
+      <mat-card class="chart-card category-chart">
+        <mat-card-header class="chart-header">
+          <mat-card-title>
+            <mat-icon class="header-icon">donut_small</mat-icon>
+            Spending by Category
+          </mat-card-title>
+          <div class="chart-actions">
+            <button mat-icon-button [matMenuTriggerFor]="categoryMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #categoryMenu="matMenu">
+              <button mat-menu-item>View Details</button>
+              <button mat-menu-item>Export Data</button>
+            </mat-menu>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container">
+            <ngx-charts-pie-chart
+              [results]="categoryData"
+              [legend]="true"
+              [labels]="true"
+              [doughnut]="true"
+              [explodeSlices]="false"
+              [gradient]="true"
+              [animations]="true"
+              [view]="chartView">
+            </ngx-charts-pie-chart>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Daily Spending Trend -->
+      <mat-card class="chart-card trend-chart">
+        <mat-card-header class="chart-header">
+          <mat-card-title>
+            <mat-icon class="header-icon">show_chart</mat-icon>
+            Daily Spending Trend
+          </mat-card-title>
+          <div class="chart-actions">
+            <mat-button-toggle-group value="7days" class="period-toggle" (change)="onChartPeriodChange($event.value)">
+              <mat-button-toggle value="7days">7D</mat-button-toggle>
+              <mat-button-toggle value="30days">30D</mat-button-toggle>
+              <mat-button-toggle value="90days">90D</mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container">
+            <ngx-charts-line-chart
+              [results]="dailySpending"
+              [xAxis]="true"
+              [yAxis]="true"
+              [legend]="false"
+              [animations]="true"
+              [gradient]="true"
+              [showXAxisLabel]="true"
+              [showYAxisLabel]="true"
+              xAxisLabel="Date"
+              yAxisLabel="Amount (₹)"
+              [view]="lineChartView">
+            </ngx-charts-line-chart>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Budget Overview -->
+      <mat-card class="budget-overview-card">
+        <mat-card-header class="chart-header">
+          <mat-card-title>
+            <mat-icon class="header-icon">account_balance_wallet</mat-icon>
+            Budget Overview
+          </mat-card-title>
+          <div class="chart-actions">
+            <button mat-stroked-button color="primary">
+              <mat-icon>edit</mat-icon>
+              Edit Budgets
+            </button>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="budget-list">
+            <div *ngFor="let category of budgetCategories" class="budget-item">
+              <div class="budget-header">
+                <div class="budget-info">
+                  <span class="budget-category">{{ category.name }}</span>
+                  <span class="budget-amount">₹{{ category.used | number:'1.0-0' }} / ₹{{ category.limit | number:'1.0-0' }}</span>
+                </div>
+                <div class="budget-percentage" [class]="getBudgetStatus(category)">
+                  {{ ((category.used / category.limit) * 100) | number:'1.0-0' }}%
+                </div>
+              </div>
+              <div class="budget-progress">
+                <mat-progress-bar
+                  [value]="(category.used / category.limit) * 100"
+                  [color]="getBudgetColor(category)"
+                  mode="determinate">
+                </mat-progress-bar>
+              </div>
+              <div class="budget-status">
+                <span class="remaining" [class]="getBudgetStatus(category)">
+                  ₹{{ (category.limit - category.used) | number:'1.0-0' }} remaining
+                </span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Recent Transactions -->
+      <mat-card class="transactions-card">
+        <mat-card-header class="chart-header">
+          <mat-card-title>
+            <mat-icon class="header-icon">receipt_long</mat-icon>
+            Recent Transactions
+          </mat-card-title>
+          <div class="chart-actions">
+            <button mat-stroked-button routerLink="/transactions">
+              View All
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="transactions-list">
+            <div *ngFor="let txn of recentTransactions; trackBy: trackTransaction" 
+                 class="transaction-item" 
+                 [class.income]="txn.type === 'income'"
+                 [class.expense]="txn.type === 'expense'">
+              <div class="transaction-icon">
+                <mat-icon [class]="'category-' + (txn.category_name || 'unknown').toLowerCase()">
+                  {{ getCategoryIcon(txn.category_name || txn.category) }}
+                </mat-icon>
+              </div>
+              <div class="transaction-details">
+                <div class="transaction-primary">
+                  <span class="transaction-description">{{ txn.description || txn.category_name }}</span>
+                  <span class="transaction-amount" [class.income]="txn.type === 'income'" [class.expense]="txn.type === 'expense'">
+                    {{ txn.type === 'income' ? '+' : '-' }}₹{{ txn.amount | number:'1.0-0' }}
+                  </span>
+                </div>
+                <div class="transaction-secondary">
+                  <span class="transaction-category">{{ txn.category_name }}</span>
+                  <span class="transaction-date">{{ txn.date | date:'MMM dd' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Upcoming & Recurring -->
+      <mat-card class="recurring-card">
+        <mat-card-header class="chart-header">
+          <mat-card-title>
+            <mat-icon class="header-icon">event_repeat</mat-icon>
+            Upcoming Payments
+          </mat-card-title>
+          <div class="chart-actions">
+            <button mat-icon-button [matMenuTriggerFor]="recurringMenu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #recurringMenu="matMenu">
+              <button mat-menu-item>Add Recurring</button>
+              <button mat-menu-item>Manage All</button>
+            </mat-menu>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="recurring-list">
+            <div *ngFor="let item of recurringTransactions" class="recurring-item">
+              <div class="recurring-date">
+                <span class="day">{{ item.day }}</span>
+                <span class="month">{{ item.month || 'This Month' }}</span>
+              </div>
+              <div class="recurring-details">
+                <span class="recurring-name">{{ item.name }}</span>
+                <span class="recurring-type">{{ item.type || 'Monthly' }}</span>
+              </div>
+              <div class="recurring-amount expense">
+                ₹{{ item.amount | number:'1.0-0' }}
+              </div>
+              <div class="recurring-actions">
+                <button mat-icon-button>
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Financial Insights -->
+      <mat-card class="insights-card">
+        <mat-card-header class="chart-header">
+          <mat-card-title>
+            <mat-icon class="header-icon">lightbulb</mat-icon>
+            Financial Insights
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="insights-list">
+            <div class="insight-item positive">
+              <mat-icon class="insight-icon">trending_up</mat-icon>
+              <div class="insight-content">
+                <span class="insight-title">Great Progress!</span>
+                <span class="insight-description">You've saved 15% more than last month</span>
+              </div>
+            </div>
+            <div class="insight-item warning">
+              <mat-icon class="insight-icon">warning</mat-icon>
+              <div class="insight-content">
+                <span class="insight-title">Food Budget Alert</span>
+                <span class="insight-description">You've used 85% of your food budget</span>
+              </div>
+            </div>
+            <div class="insight-item info">
+              <mat-icon class="insight-icon">info</mat-icon>
+              <div class="insight-content">
+                <span class="insight-title">Investment Opportunity</span>
+                <span class="insight-description">Consider investing your surplus savings</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
