@@ -41,7 +41,7 @@ testem.log
 .DS_Store
 Thumbs.db
 ../.DS_Store
-
+../venv/
 # Python & Node (common in monorepos)
 ../project-root/venv/
 node_modules/
