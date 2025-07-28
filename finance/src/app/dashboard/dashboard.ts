@@ -60,13 +60,15 @@ interface ProcessedTransaction extends Transaction {
   category_name: string;
 }
 
+// Updated interface to match actual API response
 interface BalanceResponse {
   total_income: number;
   total_expense: number;
   balance: number;
-  monthly_income: number;
-  monthly_expense: number;
-  monthly_balance: number;
+  // These monthly fields are NOT in the API response
+  // monthly_income?: number;
+  // monthly_expense?: number;
+  // monthly_balance?: number;
 }
 
 @Component({
@@ -104,7 +106,7 @@ export class DashboardComponent implements OnInit {
   incomeTransactions: Transaction[] = [];
   expenseTransactions: Transaction[] = [];
   recentTransactions: ProcessedTransaction[] = [];
-  recurringTransactions: RecurringTransaction[] = []; // THIS WAS MISSING
+  recurringTransactions: RecurringTransaction[] = [];
   
   // Chart configuration
   colorScheme = {
@@ -135,7 +137,6 @@ export class DashboardComponent implements OnInit {
       this.error = 'Authentication token missing';
       return new HttpHeaders();
     }
-    
     return new HttpHeaders({
       'Authorization': `Bearer ${this.token}`,
       'Content-Type': 'application/json'
@@ -182,10 +183,8 @@ export class DashboardComponent implements OnInit {
           return of({
             total_income: 0,
             total_expense: 0,
-            balance: 0,
-            monthly_income: 0,
-            monthly_expense: 0,
-            monthly_balance: 0
+            balance: 0
+            // No monthly fields here since they don't exist in the API
           });
         })
       )
@@ -278,9 +277,15 @@ export class DashboardComponent implements OnInit {
   private processData(): void {
     // Process balance data
     if (this.balance) {
-      this.income = this.balance.monthly_income;
-      this.expenses = this.balance.monthly_expense;
-      this.savings = this.balance.monthly_balance;
+      // FIX: Use the actual fields returned by the API
+      // The API returns total_income/total_expense, not monthly_income/monthly_expense
+      this.income = this.parseNumber(this.balance.total_income);
+      this.expenses = this.parseNumber(this.balance.total_expense);
+      this.savings = this.parseNumber(this.balance.balance);
+    } else {
+      this.income = 0;
+      this.expenses = 0;
+      this.savings = 0;
     }
     
     // Process categories for chart
@@ -294,6 +299,27 @@ export class DashboardComponent implements OnInit {
     
     // Process daily spending trend
     this.processDailySpending();
+  }
+  
+  /**
+   * Helper method to safely parse values to numbers
+   * Handles numbers, strings, null, and undefined values
+   */
+  private parseNumber(value: any): number {
+    if (value === null || value === undefined) {
+      return 0;
+    }
+    
+    if (typeof value === 'number') {
+      return value;
+    }
+    
+    if (typeof value === 'string') {
+      const num = parseFloat(value);
+      return isNaN(num) ? 0 : num;
+    }
+    
+    return 0;
   }
   
   private processCategoryData(): void {
@@ -331,7 +357,7 @@ export class DashboardComponent implements OnInit {
       const spent = this.expenseTransactions
         .filter(transaction => transaction.category === budget.category)
         .reduce((sum, transaction) => sum + transaction.amount, 0);
-        
+      
       return {
         name: categoryName,
         used: spent,
@@ -381,14 +407,12 @@ export class DashboardComponent implements OnInit {
         // Properly parse the date without hardcoding year
         const [monthA, dayA] = a[0].split(' ');
         const [monthB, dayB] = b[0].split(' ');
-        
         const dateA = new Date(`${monthA} ${dayA}, ${new Date().getFullYear()}`);
         const dateB = new Date(`${monthB} ${dayB}, ${new Date().getFullYear()}`);
-        
         return dateA.getTime() - dateB.getTime();
       })
       .slice(-7); // Last 7 days
-      
+    
     this.dailySpending = [{
       name: 'Daily Spending',
       series: sortedEntries.map(([date, amount]) => ({
@@ -415,7 +439,6 @@ export class DashboardComponent implements OnInit {
   
   getCategoryIcon(category: string | number): string {
     let categoryName: string;
-    
     if (typeof category === 'number') {
       const cat = this.categories.find(c => c.id === category);
       categoryName = cat?.name || 'Unknown';
