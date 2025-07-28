@@ -10,7 +10,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router, RouterModule } from '@angular/router';
-
+import { environment } from '../../environments/environment'; // Import environment for API URL
 interface ValidationError {
   [key: string]: string[] | string;
 }
@@ -56,7 +56,7 @@ export class SignupComponent {
     this.loading = true;
 
     // Direct HTTP call to the API
-    this.http.post('http://localhost:8000/api/users/register/', this.form.value) // 🔥 Change URL as needed
+    this.http.post(`${environment.apiUrl}/users/register/`, this.form.value) // 🔥 Change URL as needed
       .subscribe({
         next: () => {
           this.snackBar.open('User registered successfully', 'Close', { duration: 3000 });

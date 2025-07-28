@@ -5,6 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { forkJoin, Observable } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { environment } from '../../environments/environment';
 interface MonthlySummary {
   income_total: number;
   expense_total: number;
@@ -67,7 +68,7 @@ export class AnalyticsComponent implements OnInit {
   isLoading = false;
   selectedMonth: number = new Date().getMonth() + 1;
   selectedYear: number = new Date().getFullYear();
-  private baseUrl = 'http://localhost:8000/api'; // Update with your Django backend URL
+  private baseUrl = environment.apiUrl; // Update with your Django backend URL
   private httpOptions = {
     headers: new HttpHeaders({
       'Content-Type': 'application/json',

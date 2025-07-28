@@ -5,7 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { catchError, tap } from 'rxjs/operators';
 import { throwError, of, forkJoin } from 'rxjs';
-
+import { environment } from '../../environments/environment';
 interface Transaction {
   id: string;
   type: 'income' | 'expense';
@@ -71,12 +71,12 @@ export class ExpenseManagementComponent implements OnInit {
   categories: Category[] = [];
   otherCategoryId: number = 12; // Will be updated with actual ID from API
   
-  // API Configuration - MODIFIED TO USE DJANGO LOCALHOST URL
-  private readonly INCOME_API_URL = 'http://127.0.0.1:8000/api/transactions/income/';
-  private readonly EXPENSE_API_URL = 'http://127.0.0.1:8000/api/transactions/expense/';
-  private readonly CATEGORIES_URL = 'http://127.0.0.1:8000/api/categories/';
-  private readonly BALANCE_API_URL = 'http://127.0.0.1:8000/api/transactions/balance/';
-  private readonly CSV_EXPORT_URL = 'http://127.0.0.1:8000/api/export/csv/';
+ private readonly baseUrl = environment.apiUrl;
+  private readonly INCOME_API_URL = `${this.baseUrl}/transactions/income/`;
+  private readonly EXPENSE_API_URL = `${this.baseUrl}/transactions/expense/`;
+  private readonly CATEGORIES_URL = `${this.baseUrl}/categories/`;
+  private readonly BALANCE_API_URL = `${this.baseUrl}/transactions/balance/`;
+  private readonly CSV_EXPORT_URL = `${this.baseUrl}/export/csv/`;
   
   private getAuthHeaders(): HttpHeaders {
     const token = localStorage.getItem('access_token');

@@ -5,7 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 // 1. Import the necessary modules to fix NG8103 and NG8002 errors
 import { CommonModule } from '@angular/common'; // Required for *ngIf, *ngFor
 import { FormsModule } from '@angular/forms';   // Required for [(ngModel)]
-
+import { environment } from '../../environments/environment';
 interface UserProfile {
   id?: number;
   email: string;
@@ -39,7 +39,7 @@ interface NotificationSettings {
 })
 export class ProfileSettingsComponent implements OnInit {
   // API Configuration
-  private apiUrl = 'http://localhost:8000/api'; // Replace with your actual API URL
+  private apiUrl = environment.apiUrl; // Replace with your actual API URL
   private token = localStorage.getItem('access_token'); // Assuming token is stored in localStorage
 
   // Profile Data (from API)

@@ -9,7 +9,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router, RouterModule } from '@angular/router';
-
+import { environment } from '../../environments/environment'; // Import environment for API URL
 // Response interfaces
 interface LoginResponse {
   msg: string;
@@ -65,7 +65,7 @@ export class LoginComponent {
 
     const { email, password } = this.form.value;
 
-    this.http.post<LoginResponse>('http://127.0.0.1:8000/api/users/login/', {
+    this.http.post<LoginResponse>(`${environment.apiUrl}/users/login/`, {
       email,
       password
     }).subscribe({

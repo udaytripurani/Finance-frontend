@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { catchError, tap } from 'rxjs/operators';
 import { throwError, forkJoin } from 'rxjs';
+import { environment } from '../../environments/environment';
 interface Category {
   id: number;
   name: string;
@@ -47,10 +48,10 @@ export class BudgetsComponent implements OnInit {
   budgets: Budget[] = [];
   budgetAlerts: BudgetAlert[] = [];
   // Updated API URLs to use Django backend
-  private baseUrl = 'http://127.0.0.1:8000';
-  private apiUrl = `${this.baseUrl}/api/budgets/`;
-  private categoriesUrl = `${this.baseUrl}/api/categories/`;
-  private transactionsUrl = `${this.baseUrl}/api/transactions/expense/`;
+  private baseUrl = environment.apiUrl;
+  private apiUrl = `${this.baseUrl}/budgets/`;
+  private categoriesUrl = `${this.baseUrl}/categories/`;
+  private transactionsUrl = `${this.baseUrl}/transactions/expense/`;
   constructor(
     private fb: FormBuilder,
     private http: HttpClient

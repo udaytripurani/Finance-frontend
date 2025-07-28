@@ -13,7 +13,7 @@ import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { Observable, forkJoin, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-
+import { environment } from '../../environments/environment';
 interface Category {
   id: number;
   name: string;
@@ -91,7 +91,7 @@ interface BalanceResponse {
   styleUrls: ['./dashboard.scss']
 })
 export class DashboardComponent implements OnInit {
-  private apiUrl = 'http://localhost:8000/api';
+  private apiUrl = environment.apiUrl; // Use environment variable for API URL
   private token = localStorage.getItem('access_token');
   
   // Dashboard data
