@@ -36,6 +36,7 @@
           <label for="categoryType">Type</label>
           <select id="categoryType" formControlName="type" class="form-control" [disabled]="true">
             <option value="expense">Expense</option>
+            <option value="income">Income</option>
           </select>
         </div>
       </div>
@@ -72,6 +73,7 @@
           <div class="category-header">
             <span class="category-name">{{ category.name }}</span>
             <span class="category-type">Expense</span>
+           
           </div>
           <div class="category-description" *ngIf="category.description">
             {{ category.description }}

@@ -56,7 +56,7 @@ export class SignupComponent {
     this.loading = true;
 
     // Direct HTTP call to the API
-    this.http.post('http://localhost:3000/api/auth/signup/', this.form.value) // 🔥 Change URL as needed
+    this.http.post('http://localhost:8000/api/users/register/', this.form.value) // 🔥 Change URL as needed
       .subscribe({
         next: () => {
           this.snackBar.open('User registered successfully', 'Close', { duration: 3000 });

@@ -343,6 +343,7 @@ export class ExpenseManagementComponent implements OnInit {
         ...(formValue.isRecurring && { recurrence_count: 1 })
       };
       const apiUrl = formValue.type === 'income' ? this.INCOME_API_URL : this.EXPENSE_API_URL;
+      console.log("api decided")
       if (this.editingTransaction) {
         // Update existing transaction
         const transactionId = this.editingTransaction.id;
@@ -361,6 +362,7 @@ export class ExpenseManagementComponent implements OnInit {
         });
       } else {
         // Add new transaction
+        console.log("new transaction")
         this.http.post<ApiTransaction>(apiUrl, payload, { headers: this.getAuthHeaders() })
         .pipe(
           catchError(error => {
