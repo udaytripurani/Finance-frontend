@@ -1,29 +1,47 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+
 @Component({
   selector: 'app-navbar',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [CommonModule, RouterModule],
   templateUrl: './navbar.html',
   styleUrls: ['./navbar.scss']
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent {
   isMenuOpen = false;
-  user: any = null;
 
   constructor(private router: Router) {}
 
-  ngOnInit() {
+  // Reactive login status based on localStorage
+  get isLoggedIn(): boolean {
+    return !!localStorage.getItem('access_token');
+  }
+
+  // Get user from localStorage
+  get user(): any {
     const userData = localStorage.getItem('user');
-    this.user = userData ? JSON.parse(userData) : null;
+    if (userData) {
+      try {
+        return JSON.parse(userData);
+      } catch {
+        return null;
+      }
+    }
+    return null;
   }
 
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
   }
 
+  closeMobileMenu() {
+    this.isMenuOpen = false;
+  }
+
   logout() {
-    localStorage.removeItem('token');
+    localStorage.removeItem('access_token');
     localStorage.removeItem('user');
     this.router.navigate(['/login']);
   }
