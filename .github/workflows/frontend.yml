@@ -1,0 +1,38 @@
+name: Deploy Angular Frontend to Azure
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "finance/**"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_DIR: finance
+      BUILD_DIR: dist/finance
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies and build Angular app
+        run: |
+          cd $PROJECT_DIR
+          npm install
+          npm run build -- --configuration production
+
+      - name: Upload to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: finance-frontend-app
+          publish-profile: ${{ secrets.AZURE_FRONTEND_PUBLISH_PROFILE }}
+          package: ${{ env.PROJECT_DIR }}/${{ env.BUILD_DIR }}
