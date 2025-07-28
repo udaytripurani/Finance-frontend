@@ -1,6 +1,6 @@
 <nav class="navbar">
   <div class="nav-container">
-    <!-- Logo/Brand -->
+    <!-- Brand -->
     <div class="nav-brand">
       <a routerLink="/dashboard" class="brand-link">
         <i class="fas fa-wallet"></i>
@@ -8,69 +8,68 @@
       </a>
     </div>
 
-    <!-- Desktop Navigation Links -->
+    <!-- Navigation Menu -->
     <ul class="nav-menu" [class.active]="isMenuOpen">
       <li class="nav-item">
-        <a routerLink="/dashboard" 
-           class="nav-link" 
+        <a routerLink="/dashboard"
+           class="nav-link"
            [class.active]="isActive('/dashboard')"
-           (click)="isMenuOpen = false">
+           (click)="closeMobileMenu()">
           <i class="fas fa-chart-line"></i>
           Dashboard
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/expenses" 
-           class="nav-link" 
+        <a routerLink="/expenses"
+           class="nav-link"
            [class.active]="isActive('/expenses')"
-           (click)="isMenuOpen = false">
+           (click)="closeMobileMenu()">
           <i class="fas fa-money-bill-wave"></i>
           Expenses
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/budgets" 
-           class="nav-link" 
+        <a routerLink="/budgets"
+           class="nav-link"
            [class.active]="isActive('/budgets')"
-           (click)="isMenuOpen = false">
+           (click)="closeMobileMenu()">
           <i class="fas fa-piggy-bank"></i>
           Budgets
         </a>
       </li>
       <li class="nav-item">
-        <a routerLink="/analytics" 
-           class="nav-link" 
+        <a routerLink="/analytics"
+           class="nav-link"
            [class.active]="isActive('/analytics')"
-           (click)="isMenuOpen = false">
+           (click)="closeMobileMenu()">
           <i class="fas fa-chart-pie"></i>
           Analytics
         </a>
       </li>
-      <li class="nav-item dropdown" *ngIf="user">
-        <a class="nav-link dropdown-toggle" id="userDropdown">
+
+      <!-- Profile - Visible only when logged in -->
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a routerLink="/profile"
+           class="nav-link"
+           [class.active]="isActive('/profile')"
+           (click)="closeMobileMenu()">
           <i class="fas fa-user-circle"></i>
-          {{ user.name || user.email }}
+          Profile
         </a>
-        <div class="dropdown-menu">
-          <a routerLink="/profile" class="dropdown-item">
-            <i class="fas fa-user-edit"></i>
-            Profile
-          </a>
-          <a routerLink="/settings" class="dropdown-item">
-            <i class="fas fa-cog"></i>
-            Settings
-          </a>
-          <div class="dropdown-divider"></div>
-          <a (click)="logout()" class="dropdown-item logout">
-            <i class="fas fa-sign-out-alt"></i>
-            Logout
-          </a>
-        </div>
+      </li>
+
+      <!-- Logout - Visible only when logged in -->
+      <li class="nav-item" *ngIf="isLoggedIn">
+        <a class="nav-link logout-link"
+           (click)="logout(); closeMobileMenu()">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </a>
       </li>
     </ul>
 
-    <!-- Mobile Menu Toggle -->
-    <div class="nav-toggle" (click)="toggleMenu()">
+    <!-- Hamburger -->
+    <div class="nav-toggle" (click)="toggleMenu()" [class.active]="isMenuOpen">
       <span class="bar"></span>
       <span class="bar"></span>
       <span class="bar"></span>
