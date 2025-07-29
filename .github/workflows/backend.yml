@@ -29,10 +29,7 @@ jobs:
         run: |
           python manage.py migrate --noinput
 
-      - name: 📤 Collect static files (optional)
-        working-directory: project-root/backend
-        run: |
-          python manage.py collectstatic --noinput
+     
 
       - name: 🚀 Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
