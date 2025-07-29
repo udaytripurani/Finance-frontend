@@ -78,6 +78,7 @@ MIDDLEWARE = [
 ]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
+    "https://finance-frontend-app.azurewebsites.net"
 ]
 ROOT_URLCONF = 'finance_tracker.urls'
 
