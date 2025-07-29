@@ -4,44 +4,49 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'project-root/backend/**'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: 🐍 Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         working-directory: project-root/backend
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run migrations & collectstatic
+      - name: 🛠️ Run Migrations
         working-directory: project-root/backend
         env:
-          DJANGO_SETTINGS_MODULE: finance_tracker.settings
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DJANGO_SECRET_KEY: ${{ secrets.SECRET_KEY }}
           DEBUG: 'False'
-          ALLOWED_HOSTS: '.azurewebsites.net'
+          ALLOWED_HOSTS: finance-tracker-backend.azurewebsites.net
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          python manage.py migrate
+          python manage.py migrate --noinput
+
+      - name: 📁 Collect static files
+        working-directory: project-root/backend
+        env:
+          DJANGO_SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DEBUG: 'False'
+          ALLOWED_HOSTS: finance-tracker-backend.azurewebsites.net
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
           python manage.py collectstatic --noinput
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v2
+      - name: 🚀 Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
         with:
           app-name: finance-tracker-backend
-          slot-name: production
-          publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: project-root/backend
