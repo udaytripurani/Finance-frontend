@@ -135,8 +135,18 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 
 CORS_ALLOW_CREDENTIALS = True
 
+from corsheaders.defaults import default_headers
 CORS_ALLOW_HEADERS = list(default_headers) + [
-    'X-Requested-With',
     'Content-Type',
     'Authorization',
+    'X-Requested-With',
+]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
 ]
