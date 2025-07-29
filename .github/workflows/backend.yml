@@ -1,9 +1,11 @@
-name: Deploy Django Backend to Azure
+name: Deploy Django Backend to Azure App Service
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'project-root/backend/**'
 
 jobs:
   build-and-deploy:
@@ -19,29 +21,19 @@ jobs:
           python-version: '3.11'
 
       - name: 📦 Install dependencies
-        working-directory: project-root/backend
         run: |
+          cd project-root/backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 🛠️ Run Migrations
-        working-directory: project-root/backend
-        env:
-          DJANGO_SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          DEBUG: 'False'
-          ALLOWED_HOSTS: finance-tracker-backend.azurewebsites.net
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: 🛠️ Run migrations
         run: |
+          cd project-root/backend
           python manage.py migrate --noinput
 
-      - name: 📁 Collect static files
-        working-directory: project-root/backend
-        env:
-          DJANGO_SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          DEBUG: 'False'
-          ALLOWED_HOSTS: finance-tracker-backend.azurewebsites.net
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: 🧹 Collect static files
         run: |
+          cd project-root/backend
           python manage.py collectstatic --noinput
 
       - name: 🚀 Deploy to Azure Web App
