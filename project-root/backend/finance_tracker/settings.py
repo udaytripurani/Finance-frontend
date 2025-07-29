@@ -111,14 +111,14 @@ WSGI_APPLICATION = 'finance_tracker.wsgi.application'
 # }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'your_supabase_password',  # Replace with real password
-        'HOST': 'db.tdtixeaqfqpfxbivzjcw.supabase.co',
-        'PORT': '5432',
-    }
+  'default': {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': 'postgres',
+    'USER': 'postgres.tdtixeaqfqpfxbivzjcw',
+    'PASSWORD': 'uday2acc',
+    'HOST': 'aws-0-ap-south-1.pooler.supabase.com',
+    'PORT': '5432',
+  }
 }
 
 AUTH_USER_MODEL = 'users.User'
