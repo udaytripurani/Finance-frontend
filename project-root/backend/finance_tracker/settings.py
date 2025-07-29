@@ -109,6 +109,7 @@ WSGI_APPLICATION = 'finance_tracker.wsgi.application'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DATABASES = {
   'default': {
